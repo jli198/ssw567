@@ -1,0 +1,1768 @@
+<html><head>
+<meta http-equiv="content-type" content="text/html; charset=windows-1252"><title>Chaos Engineering Panel</title></head>
+<body>
+
+<h2>Chaos Engineering Panel</h2>
+
+ICSE 2016
+<br>
+Wednesday May 18, 2016, 4:00-5:30pm
+<p>
+
+</p><p>
+<b>Panel members:</b>
+<br>
+Aaron Blohowiak - Netflix (moderator)
+<br>
+Lorin Hochstein - Netflix
+<br>
+Ian Van Hoven - Yahoo
+<br>
+Heather Nakama - Microsoft
+
+
+
+</p><h3>Summary of Chaos Engineering Panel</h3>
+<p>
+Chaos Engineering is a set of testing approaches for finding
+bugs in the interactions between software components.
+Chaos techniques try to automatically exercise some of a
+system's failure recovery functionality in testing, with
+goal of improving software reliability.
+</p><p>
+Chaos tests trigger specific system failures.
+Two kinds of failure tests are common:
+forcing selected internal service requests to fail
+within a microservices-based system, and
+adding extra latency into service requests and responses.
+It is common for these Chaos tests are run selectively on a production
+system, but they could instead be run on a clone of the production
+environment or in traditional system testing.
+</p><p>
+Chaos tests and experiments are typically run in an "automated
+build and test environment, usually as part of a
+Continuous Integration or Continuous Delivery process.
+</p><p>
+Some key parts of the definition of Chaos Engineering from the
+panelists:
+</p><ul>
+<li>Chaos Engineering is a way of doing experimentation.
+We want to understand the behavior of the Netflix system by doing
+experimentation directly on the system -- as it is running in
+production.
+
+</li><li>In Azure Search, we don't run our Chaos Engineering on actual
+production services. We run it on services that are in production, but
+that don't contain any customer data. We want to observe exactly how
+our services will melt down when things go really wrong.
+
+</li><li>Chaos Engineering tries to introduce the irregular occurrences more
+regularly.
+</li></ul>
+
+<p>
+Chaos testing doesn't replace traditional integration testing, security
+testing, and other regular testing processes.  It supplements the
+standard tests.
+</p><ul>
+<li>We typically just run it [Chaos testing] in the Continuous Delivery
+pipeline. As your software is making its way from "git" out to the
+world, we will throw a bunch of TCP disconnects and latency at various
+paths in your code... and make sure the fail-safes are run.
+
+</li><li>In a production environment, there are so many unknowns. Trying to test
+everything exhaustively is just a waste of time. Doing it this way
+(Chaos) has been far more efficient for us than writing really granular
+dedicated integration tests.
+
+</li><li>We are focusing about Chaos here, but you are also seeing "canary
+deployments", where you push out new code by deploying it to a small
+number of servers -- only a fraction of the traffic gets it -- and you
+compare to see that it behaves perfectly compared to the old one.
+</li></ul>
+
+<p>
+The panelists didn't have "hard numbers" on the utility of Chaos testing,
+but they did some internal tracking of defects and field failures -- and
+they managed to get buy in from their developers on the value of
+this form of testing.
+
+</p><ul>
+<li>I said if we found these bugs earlier, wouldn't that be better than
+3 hours time for 5 people at 3:00am while customers are down? Wouldn't
+it be nicer to figure out how to make it only one hour and one person
+the next time it fails?
+</li><li>I showed numerical evidence that this gives better service
+quality. I don't have the numbers here to show you, but it has been a
+huge tool to work with my team.
+</li></ul>
+
+<p>
+There were some good ideas on how to control the "scope" of the testing,
+so they wouldn't have as much impact on real-world customers:
+
+</p><ul>
+<li>One thing we do in Chaos experiments: we control how many users are
+subjected to an experiment. Our goal is to make that test group as
+small as we can. We are trying to reduce the "blast radius" by
+inflicting the minimum amount of harm to customers when we do these
+experiments.
+
+</li><li>One of the things we do is to inject failures between two services.
+In a remote procedure call, we can do either "latency" or
+"failure". For example, "If service A calls service B, for users that
+match these ids, then fail that request (return an error right away) --
+or add 400 milliseconds of latency." 
+
+</li><li>[We designed a Chaos system that is] "opt in", so if you want to run it
+on your system, you install a library and proxy your requests through
+it. It has access to every element of that request -- it can terminate
+a connection, inject latency, and so on.
+
+</li></ul>
+
+<p>
+What is needed to adopt Chaos Engineering?
+</p><ul>
+<li>The first thing you need to do to adopt Chaos Engineering: observe
+the behavior of your system.
+</li><li>It is important to have a business metric for system behavior.
+[What levels of customer service, ability to stream how many videos,
+etc.]
+</li><li>Another thing you need: you need to be able to design your system
+for resiliency. If the system can't withstand failures, there is no
+sense doing Chaos testing. [The system has redundancy, automated
+failover, and other resiliency functionality.]
+</li><li>The last thing you need: monitoring and alerts -- so that when
+something bad is happening to your system, people get notified, so you
+can minimize the outage. The last thing you need: monitoring and alerts
+-- so that when something bad is happening to your system, people get
+notified, so you can minimize the outage. 
+</li></ul>
+
+<p>
+Can we use Chaos Engineering in life-critical systems?  We probably
+cannot do Chaos testing in a production environment for telecom,
+air traffic control, heart monitors, and so on.
+But in most non-critical systems that are using an agile development
+approach and DevOps techniques, Chaos techniques can help improve
+performance and reliability in the field.
+
+</p><ul>
+<li>Most of the companies that I have worked at, the users want to see
+new features and functionality, and they are a little bit more
+forgiving about periodic downtime -- than they would be for a hospital
+system or an electric company.
+</li><li>We want to make availability to be just good enough -- so
+availability is not one of the top 10 things people at Netflix complain
+about.
+</li><li>[A case study from Fidelity Investments...] Their system used three
+mainframes -- one live and two standbys. With one of the standbys, they
+loaded it with shadow traffic: real user data that had been
+anonymized. So although they didn't do true "production", they got as
+close they could in order to see if their system could handle an
+increased number of trades. It's not a safety critical system, but it
+is a system where the cost of bad things happening is very high. And
+they used a lot of effort to make their testing as close to production
+as they could.
+</li></ul>
+
+<p>
+How much work is involved in setting up Chaos tests and experiments?
+It depends on the environment and the application infrastructure.
+Some folks create some special libraries with testing hooks, other
+people set up special proxy servers to add in selected errors and
+latency.
+The most important thing is to have adequate tools for monitoring
+system behavior without being overwhelmed by error messages.
+
+</p><p>
+For more information on Chaos Engineering, visit the
+Principles of Chaos website:
+<a href="http://principlesofchaos.org/">
+principlesofchaos.org</a>.
+
+</p><hr>
+
+<h3>Transcript of the panel discussion</h3>
+<i>(<b>Note:</b>  This transcript is mostly a word-for-word transcription,
+created from my audio recording of the panel.  I omitted some minor points for
+clarity, and there were a few places where I had to paraphrase because
+of problems hearing the speaker on the recording.)</i>
+<p>
+<i>(This transcript was created by Dennis Mancl
+(dmancl@acm.org) -- Copyright (c) 2016 Dennis Mancl.
+The transcript is being made available to the panelists as a courtesy,
+but I have no plans to post the transcript in a public place.
+It is OK if you want to make a summary of parts of the panel discussion
+for publication or your own internal use.)</i>
+
+</p><hr>
+
+<p>
+<b>Aaron.</b>
+Hello, I am Aaron Blohowiak,
+and I will be moderating this panel.
+</p><p>
+For more background on Chaos Engineering, you can
+go to
+<a href="http://principlesofchaos.org/">
+principlesofchaos.org</a>.
+There is a link there to the Google group which you can join to
+be part of the discussion.
+</p><p>
+How many of you are familiar with Chaos Engineering?  How many of you
+practice Chaos Engineering?  Well, maybe some of you will after
+this panel.
+</p><p>
+We will have the panelists introduce themselves:  who you are, where you
+work, and what role you play in that organization.
+</p><p>
+<b>Lorin.</b>
+I am Lorin Hochstein, and I work at Netflix.
+I am on the Chaos team -- Chaos sits under performance and reliability
+at Netflix.
+</p><p>
+Our primary mission is to improve the availability of the Netflix
+service by identifying weaknesses in the system -- to proactively
+fix anything that might cause outages.
+We build tools to do this.  We build tools that other engineers use
+to look for failures systematically.
+</p><p>
+<b>Ian.</b>
+I am Ian Van Hoven, and I work at Yahoo -- in the media division,
+or "publisher products" division.
+You can think of this as everything other than search and mail.
+</p><p>
+I was thinking about a joke this morning:  These days, Chaos and
+Yahoo kind of go hand in hand.
+</p><p>
+I run two projects within media:  production engineering (which
+you can think of as SRE -- effectively, it is an operations arm
+within the division), and small tools team called engineering
+services (our job is to create tools to help developers
+write their software, get their software into production more quickly,
+improve the reliability and operability of the software, and so on).
+</p><p>
+Chaos at Yahoo is a relatively nascent concept or initiative.
+We are about 3 or 4 months into experimenting with it.
+So far, with the initial investments we have made,
+we have seen a lot of progress: ferreting out the "unknown unknowns"
+in the software in places where we have brittleness or fragility,
+surfacing them so developers can work on fixing them.
+</p><p>
+<b>Heather.</b>
+I am Heather Nakama, and I am a developer with Azure Search,
+which is Microsoft's search-as-a-service solution.
+</p><p>
+We are a really small startup team, many of us wear a large number
+of hats -- I work on the backend infrastructure and on a Chaos
+Engineering system.
+</p><p>
+<b>Aaron.</b>
+I'm Aaron Blohowiak from Netflix.
+I have been causing problems in production for years,
+and I am trying to use that skill "for good".
+</p><p>
+We had two other panelists (from Uber and Fidelity) who were going
+to join us but had to cancel at the last minute.
+</p><p>
+<b>Aaron.</b>
+<i>(First question from the panel session slides.)</i>
+We'll start out with the question "What is Chaos Engineering?"
+When we polled the audience, more than half were unfamiliar
+with the term.
+</p><p>
+<b>Lorin.</b>
+For us, Chaos Engineering is a way of doing experimentation.
+We want to understand the behavior of the Netflix system by doing
+experimentation directly on the system -- as it is running in production.
+</p><p>
+That experimentation consists of "failure injection".
+We are concerned about availability.
+We want to inject real things that could happen, but that
+don't happen all the time.
+Things that happen occasionally and are generally "bad", like failures,
+or could be "good", like a lot of extra traffic you don't expect.
+</p><p>
+We want to observe how the system's behavior changes.
+For us, we are interested in how our customers' perceived experience
+changes -- not so much about CPU usage or memory usage.
+</p><p>
+<b>Ian.</b>
+I would say our philosophy is similar.
+In a large company such as the one we work for,
+developers tend to work on relatively small pieces of code.
+They are not always thinking holistically:
+how changes they might make or restrictions they might inject might
+affect things.
+Injecting a bunch of latency into a downstream call or an unexpected
+disconnection of a TCP connection between two systems -- these might
+cause a user experience that is horrendous.
+</p><p>
+We have yet to unleash our Chaos Engineering system solution into
+production.
+We typically just run it in the Continuous Delivery pipeline.
+As your software is making its way from "git" out to the world,
+we will throw a bunch of TCP disconnects and latency at various
+paths in your code... and make sure the fail-safes are run.
+</p><p>
+Eventually, we hope to do this in production as it becomes more
+mature.
+But today, you can think of it as just another test step in our pipeline.
+</p><p>
+<b>Heather.</b>
+I think I'm going to hit the same points as you two.
+There is a lot of convergent evolution as far as our uses of
+Chaos Engineering.
+</p><p>
+For us, it is a way of performing fault injection on a higher level
+than normal.
+</p><p>
+We run our services in a normal production environment with
+normal dependencies on actual components.
+Then we start poking at it to see what happens.
+</p><p>
+It gives us more insight into how our service works both in normal
+situations and also in a really bad critical situation -- how it
+behaves with failures, how it might fall apart.
+And in our case, we can do it in an environment that is a little more safe.
+It's better than when the problems hit us in production.
+We have a little more leeway and leisure time to see what is happening.
+</p><p>
+<b>Aaron.</b>
+Can you explain a bit further what you mean by doing it in a safer environment?
+</p><p>
+<b>Heather.</b>
+In Azure Search, we don't run our Chaos Engineering on actual production
+services.
+We run it on services that are in production, but that don't contain
+any customer data.
+We want to observe exactly how our services will melt down
+when things go really wrong.
+But we don't want to have to prioritize our work the way that you
+would in a normal field incident.
+</p><p>
+In a field incident, our first priority is to get the customer service
+back up and running,
+including a reload of customer data.
+In our Chaos scenarios, we are more interested in making sure that
+everything fails in the nicest way and all the alerting works properly.
+There is more leeway in exploring the failure behavior.
+</p><p>
+<b>Aaron.</b>
+If I can just add a little bit... Things go wrong in the real world,
+and you want to see how the system will behave when things go wrong.
+You won't know exactly how it will behave unless you inject that error.
+Chaos Engineering tries to introduce the irregular occurrences more
+regularly.
+</p><p>
+<b>Ian.</b>
+Just to add... It was 1998 or 1999 that I saw deliberate Chaos
+Engineering for the first time.
+I was in a managed service company at the time.
+The CTO of one of our clients had a habit of
+visiting the data center -- and he would just pull out of the wall the
+first cable he saw.
+Bad things would happen... and we would just scratch our heads and
+laugh at the same time.
+But it definitely kept his engineers on their toes.
+</p><p>
+It was a small company -- maybe 10 engineers -- but they
+could always tell when Rob went to the data center, because
+the database would fall offline or whatever.
+</p><p>
+I think there is a rich history of this, even if it isn't
+as sophisticated and automated as it is today.
+</p><p>
+<b>Q1.</b>
+One of the things I didn't hear but expected to hear in your
+description of Chaos Engineering is the security ramifications.
+Is that something you factor in?
+Is that part of your process, or is there a separate security version of this?
+</p><p>
+<b>Aaron.</b>
+So do you mean: Do we test security constraints through Chaos Engineering?
+or How do we make sure the results of our Chaos tests doesn't violate our
+security constraints?
+</p><p>
+<b>Q1.</b> <i>(continued)</i>
+The first one.
+</p><p>
+<b>Heather.</b>
+Right now, we don't do any specific tests beyond just blind monkey tests -- putting
+in random inputs to see if anything weird happens.
+We aren't doing any targeted testing right now.
+There is a team in Azure that works on that, but our team isn't doing it now.
+</p><p>
+<b>Ian.</b>
+We have an entire division of people in Yahoo called "the paranoids".
+They don't call it Chaos Engineering, but they are in charge of testing for the kinds
+of weaknesses you are talking about.
+Our team hasn't focused on security -- we are more interested in reliability.
+And we are focused almost entirely inside of the data center as opposed to
+on the WAN.
+</p><p>
+<b>Lorin.</b>
+Yes, the security testing is separate for us.
+There is a Security Monkey in Netflix -- but I don't know what it does.
+</p><p>
+<b>Aaron.</b>
+<i>(Next question from the panel session slides.)</i>
+How did you begin practicing Chaos Engineering?
+</p><p>
+<b>Lorin.</b>
+I've only been at Netflix for under a year.
+Chaos Engineering has been around in Netflix so long that
+the people who introduced it aren't there anymore.
+I can tell from external sources that it
+has been around since 2011.
+</p><p>
+<b>Ian.</b>
+I first learned about the existence of Chaos Engineering when I worked at Netflix,
+which was probably just before Lorin got there.
+The company was in the middle of transitioning from a data center to Amazon
+at the time -- and we were going down constantly.
+I had come out of a service provider world,
+where 5 minutes of downtime equates to me on the phone for about a quarter
+with my customers -- explaining how it happened and why it won't happen again.
+</p><p>
+In Netflix in the Amazon environment, we were going down 4 hours or 8 hours at a time.
+I asked our CEO in a group meeting -- is that an acceptable risk to achieve pace
+(of delivery of new features)?  He said "Absolutely.  This is something that
+doesn't affect our core business but we need to get better at it."
+</p><p>
+It was right around that time that they realized that although Amazon gave us
+a ton of utility (and I don't want to pick on Amazon), but you also
+need to wrap your own protections around it -- to
+make sure that the issues that they inject into the system don't bring your
+application down.
+</p><p>
+<b>Heather.</b>
+I had been doing some testing at a different scale -- monkey testing on
+user interfaces -- but I didn't apply it to distributed systems at scale
+until I read the Netflix 2011 paper.  I thought it was a brilliant idea,
+but at the time, I just went back to doing my work.
+</p><p>
+In the small team that I am on now, we are all encouraged to come up with
+our own products and "pitch" them.
+After a particularly horrible night, where we had
+been fixing problems and babysitting the system after it came up badly,
+I saw we had zero experience in testing in this kind of recovery scenario.
+</p><p>
+I realized that Chaos Engineering was a good way to make sure we
+have practice doing this, rather than
+doing it at 3:00am -- when you are not at your best.
+</p><p>
+<b>Q2.</b>
+Can you talk about the technical and cultural barriers to testing
+in production?
+</p><p>
+<b>Ian.</b>
+We don't do it in production today.
+We have signaled to our development partners that we intend to in the future.
+By and large, they are not going to have any real say in the matter.
+(I'm sounding more cavalier than I mean to...)
+We are trying to evolve software engineering practices at Yahoo... just like
+most companies are.
+More and more, developers are starting to understand that
+putting their software under immense strain *now* will save them
+headaches in the future.
+</p><p>
+Some developers are against this, some are at least curious and want to know more,
+but I don't think we are facing a huge philosophical battle.
+But we are still quarters away from having the technology to do it.
+</p><p>
+<b>Q2.</b> <i>(continued)</i>
+Could you say a bit more about what that conversation was actually like?
+</p><p>
+<b>Ian.</b>
+We haven't gone out and said "we're coming for you".
+In the course of talking about a bunch of initiatives we have underway,
+including Chaos,
+the question has arisen.
+It has been less of a campaign and more of a reactive response
+to questions we have had from developers.
+The interactions have been relatively high level and informative so far.
+</p><p>
+In general, what I have heard from developers I have talk to is
+an openness to engage in the concept.
+There haven't been that many questions yet.
+There hasn't been a long debate on it.
+It hasn't gone to a tech council like many other issues... but it will eventually.
+We're not to that point yet.
+</p><p>
+<b>Q2.</b> <i>(continued)</i>
+So this is all internal?  Why aren't you guys going around the data center
+unplugging cables?
+</p><p>
+<b>Ian.</b>
+If it were a smaller company, we would be.
+We are a big company, and there is another division that
+has the ability to pull cables out, so there are some
+practical barriers to us doing that.
+And I think we want the solution architected
+in a better and more mature state before we start doing that.
+We are still in early stages.
+Even doing it in the Continuous Delivery pipelines,
+it isn't perfect every time... we are still running into issues.
+</p><p>
+We've talked to developers... that in a future state, Q1 of next year maybe,
+we intend to do this and we want your support.
+And at least directionally we have gotten buy-in.
+</p><p>
+<b>Q2.</b> <i>(continued)</i>
+So is that part of the art here -- to break some stuff but not to destroy Yahoo?
+</p><p>
+<b>Ian.</b>
+Yeah.  I would say that is part of it.
+We want it to be instructive and productive as opposed to being destructive.
+</p><p>
+<b>Lorin.</b>
+We have been doing it for a while, since at least 2011.
+</p><p>
+Chaos Monkey was one of our first tools -- and it randomly turns off servers
+that are in production and taking real traffic from users.
+</p><p>
+Initially, it was "opt-in".  It was off by default.
+You had to turn it on, and it caused some problems initially.
+People were nervous that it would cause outages.
+But over time, people saw the value.
+</p><p>
+The idea is:  You need to build your systems to be resilient.
+When you rely on the cloud, servers go down.
+You have to design for that -- and this incentivizes people to
+build their systems this way.
+</p><p>
+At Netflix, we (developers) have freedom and responsibility -- which means
+you can't tell anyone what to do, you can't enforce process across the organization.
+So we have to work through incentives instead.
+</p><p>
+Gradually, people saw the value in Chaos Engineering, so now it is
+an "opt-out" model.  It is on by default, but people do still turn it
+off in some cases.
+</p><p>
+Some of our legacy stuff is not so fault tolerant, so they leave it off
+for now until they architect some new stuff.
+</p><p>
+I can tell you that the "stateful services" -- the guys who maintain the
+databases -- even though they have redundancy, they are a little more
+hesitant.  It's because it takes them more recovery time.
+</p><p>
+Most Netflix services are stateless, which means that you can kill one service
+and bring up another copy with no problems.
+But the services that are stateful, like databases, it takes some recovery time.
+The information is replicated, but if several things go down, it takes them
+much longer to recover.
+</p><p>
+We are trying to encourage them to do more Chaos testing, but it is a harder
+sell, because of the longer recovery time.
+</p><p>
+<b>Aaron.</b>
+I'm interested in your experience, Heather, in barriers to running real customer traffic
+in the production environment.
+</p><p>
+<b>Heather.</b>
+In Azure Search, we are a database.
+Customers pay for dedicated hardware.
+</p><p>
+At the moment, with our level of distributed system maturity, 
+we're just not able to bring up
+a replica node fast enough to prevent interruptions or
+degradation of customer service.
+</p><p>
+This points out that an area of weakness in our service, that
+we are vulnerable to having a node go down.
+We can insure that our service can still serving traffic at the
+same rate as before.
+This is one of the areas we are pushing on to make our service
+a bit more stateless than before.
+</p><p>
+It is like When your code isn't very "unit testable",
+you learn that maybe your code isn't as composable as you thought it was.
+In the same way, our inability to test in production shows us that we aren't
+as resilient as we want to be.
+</p><p>
+<b>Aaron.</b>
+I would highly suggest that you only inject failures that
+you expect to be able to recover from in production.
+</p><p>
+<b>Q3.</b> (Linda Laird, Stevens Institute of Technology)
+Do any of you have data on the defects found based on
+the amount of testing, severity of defects, and so on?
+</p><p>
+<b>Heather.</b>
+I don't have any hard numbers I can show you.
+But one way I got buy in from my team is that I kept a weekly report
+of all of the normal operations that I ran on the service with simulated
+customer traffic,
+and the number of times I had to touch the code in the service to fix
+the problems I found when I ran the Chaos tests on it.
+I also included all of the incidents and alerts that I generated.
+I also tracked all the bugs that came out of this.
+</p><p>
+If you look at these graphs over time,
+the operations went up and the bugs found went down -- actually, first up and
+then down.
+And the number of times I touched the code also went down.
+</p><p>
+I showed numerical evidence that this gives better service quality.
+I don't have the numbers here to show you, but it has been a huge
+tool to work with my team.
+</p><p>
+<b>Ian.</b>
+I don't have hard numbers either.
+Looking at our data running up to a product launch,
+Chaos tends to find issues that our QA teams don't find.
+QA teams are looking for a totally different culprit.
+Given tools and a bigger team, QA would probably find them.
+</p><p>
+You run a lot of QPS at something, saturate a link, or disconnect something,
+and the bugs just start piling up.
+We've had good success, but it is only anecdotal.
+We have teams come back and say "I had no idea that the service
+would fall over if we raised QPS by 20%.  We've done something
+to fix that now."
+They are generally in favor and see some value in it.
+</p><p>
+<b>Lorin.</b>
+We don't have any quantitative data either.
+If we find issues and uncover problems,
+then there is value in it.
+But each team tracks bugs in its own way,
+and we keep data on overall outages and share it internally.
+</p><p>
+There is a great graph I show -- it shows that most of our
+outages happen on weekdays, because they are due to people
+making changes to the production system.
+It happens mostly between 9:00am and 6:00pm, and there is
+a big dip at 11:00pm, because that is when they serve lunch at Netflix.
+</p><p>
+<b>Aaron.</b>
+It is also no longer a source of panic to see people complaining about AWS (Amazon)
+issues in regions on Twitter -- because in most regions we have people
+to respond to those issues without having a negative impact to our customers.
+For better or worse, many of our issues are self-inflicted, not the instability
+of other things.
+</p><p>
+<b>Aaron.</b>
+<i>(Next question from the panel session slides.)</i>
+Why not just do traditional integration testing in a test environment?
+</p><p>
+<b>Lorin.</b>
+What blew me away when I got to Netflix -- Netflix cannot do and end-to-end test
+of its service.
+There is a test environment, you can launch all of your services in that
+environment -- but Netflix's service is a microservices-based architecture
+that has grown organically, with hundreds of microservices that make up
+the Netflix service.
+These microservices are owned and operated by separate engineering teams.
+We can't just "bring up the whole system in test".
+Even if we wanted to do integration testing, today we cannot do it.
+</p><p>
+Even if we could, the system changes too quickly to use integration testing.
+If you used integration testing to find all the issues,
+multiple changes would have been made to production, configuration changes
+pushed to the environment.
+</p><p>
+Any testing environment is not going to look like the production environment.
+There will always be some differences, and those differences are going to
+bite you sometime.
+Even if it is just a DNS name issue,
+you're going to find out that there was some change.
+</p><p>
+Ultimately, in terms of the validity of experiments on the system,
+nothing beats actually running your experiments in production.
+</p><p>
+<b>Ian.</b>
+Nothing beats production in terms of surfacing issues.  Similar to Netflix,
+Yahoo is gigantic.
+It is hundreds of interdependent services run
+by different units and different teams.
+Many of them were written by people who are no longer at Yahoo.
+The complexity makes it impossible to check things completely in integration testing.
+</p><p>
+<b>Heather.</b>
+We have the exact same experience.
+We still use integration tests.
+It's good to know that different units interact with each other nicely,
+but when you get into production, many of the units are built by external
+teams that you have no control over.
+They might change something at random that changes
+things so you have no idea what is happening.
+</p><p>
+In a production environment, there are so many unknowns.
+Trying to test everything exhaustively is just a waste of time.
+Doing it this way (Chaos) has been far more efficient for us
+than writing really granular dedicated integration tests.
+</p><p>
+<b>Aaron.</b>
+Let me add that we have over two dozen supported clients that call
+our API services,
+so maintaining tests that cover expected functionality for all
+two dozen devices and their varying call patterns would be expensive.
+Doing it production is easier.
+</p><p>
+<b>Q4.</b>
+Is this a pattern?  Getting away from traditional testing and test harnesses
+and towards more production testing?
+</p><p>
+<b>Lorin.</b>
+Yes, I think that is fair to say.
+</p><p>
+We are focusing about Chaos here, but you are also seeing "canary deployments",
+where you push out new code by deploying it to a small number of servers --
+only a fraction of the traffic gets it -- and you compare to see that it behaves
+perfectly compared to the old one.
+If it doesn't return errors and
+the output stays the same, you promote the new one to production.
+</p><p>
+You are seeing more and more of this -- you will still do testing,
+but you are seeing other ways to evaluate the system behavior
+directly in production.
+</p><p>
+<b>Ian.</b>
+I have a friend and former colleague who runs the build
+architecture and systems at Facebook.
+I was visiting him one day in the office
+a long time ago (before they were terribly gigantic),
+and I asked him, "How do you test this if you are rolling
+this out to so many thousands of systems? What is your
+QA? What does your test infrastructure look like?"
+</p><p>
+He replied, "You want to see how we do QA?"  He started the
+release process -- 700 systems at a time -- and he just
+brought up Twitter, looking for "Facebook down" and
+similar phrases.
+He was looking for external people saying that they were
+seeing an issue, and that is how they knew when they needed
+to roll something back... so that was their version of "canary".
+</p><p>
+I've done it differently at other companies, where you roll
+it out to a small subset of users and see if there is any smoke...
+There are a bunch of different patterns.
+</p><p>
+But the answer to your question is "yes", this is the way
+the industry seems to be going.
+In most of the companies I have worked at in the last 10 years,
+the risk-reward ratio is tilting more towards "get it out into
+production as quickly as you can" -- to see if it fails, and to
+iterate.
+</p><p>
+<b>Q5.</b> (Dennis Mancl, MSWX Software Experts)
+I can't do that in life critical systems.
+If I'm doing an E911 system, it's going to affect real people.
+</p><p>
+<b>Ian.</b>
+We always joke about this.
+When I was at Netflix serving up movies or at LinkedIn serving up resumes,
+we said that nobody dies when our service goes down.
+So it depends on the context in your case.
+</p><p>
+Most of the companies that I have worked at, the users want to see
+new features and functionality, and they are a little bit more
+forgiving about periodic downtime -- than they would be for a
+hospital system or an electric company.
+</p><p>
+<b>Q6.</b>
+There is a corollary to that... if we are using Chaos Engineering
+to minimize downtime,
+and if you are saying we can't do that for critical systems,
+it doesn't quite match up.
+</p><p>
+<b>Lorin.</b>
+We're not trying to minimize downtime.
+We have a goal for downtime -- roughly "four nines" (99.99% available).
+[Note:  Most telecom systems require "five nines".]
+</p><p>
+If we need to trade off between being more available and developing
+more new features, we're going to do more features.
+If we wanted to maximize availability, we would just stop changing
+the system -- don't make any changes and your availability will get better.
+</p><p>
+We want to make availability to be just good enough -- so availability
+is not one of the top 10 things people at Netflix complain about.
+When we are there, we will let engineers develop as quickly as possible.
+</p><p>
+<b>Aaron.</b>
+I've been told if we hit six nines, we aren't moving fast enough.
+</p><p>
+<b>Lorin.</b>
+One of the people who couldn't make it to the panel was
+Kyle Parrish from Fidelity Investments.
+They did some similar Chaos stuff on a trading system.
+They couldn't do it directly in production.
+</p><p>
+Their system used three mainframes -- one live and two standbys.
+With one of the standbys, they loaded it with shadow traffic:
+real user data that had been anonymized.
+So although they didn't do true "production", they got as close
+they could in order to see if their system could handle an
+increased number of trades.
+</p><p>
+It's not a safety critical system, but it is a system where
+the cost of bad things happening is very high.
+And they used a lot of effort to make their testing
+as close to production as they could.
+</p><p>
+<b>Q7.</b> (Linda Laird)
+I would think that on safety critical systems,
+you may not be able to do it in production,
+but you try to get as close as possible and
+basically do all the same stuff.
+</p><p>
+<b>Ian.</b>
+One pattern is to "tee off" traffic,
+duplicate real production traffic to a separate system,
+where it doesn't matter if that blows up.
+You want to expose weaknesses without affecting the actual
+primary request.
+</p><p>
+<b>Q8.</b>
+How much downtime can you afford?
+</p><p>
+<b>Lorin.</b>
+I don't have a mandate.
+No one says to us that we can only have
+30 minutes downtime per year.
+It is a measure of "if you click the play button, does the video play?"
+It might be that the interface is degraded, but
+if you can't watch a video, that is really bad.
+</p><p>
+We don't have an SLA (Service Level Agreement) that says
+"we can't miss more than 20000 streams per year" or something like that.
+It is really a soft thing.
+We look at trends over time to see if we are getting better or worse.
+</p><p>
+Under the performance reliability team,
+there is a core team that are the first responders to an outage.
+They are responsible for tracking the information
+about all the outages.
+They generate a bunch of the build delay reports.
+A lot of the downtime is because a third party went down.
+That we have no control over... but most problems are self-inflicted.
+</p><p>
+<b>Aaron.</b>
+This leads into the next question...
+<i>(Next question from the panel session slides.)</i>
+What are some of the prerequisites for Chaos Engineering?
+</p><p>
+<b>Lorin.</b>
+The first thing you need to do to adopt Chaos Engineering:
+observe the behavior of your system.
+It sounds really obvious -- know what your system is doing.
+But I've worked at companies where if you asked them "do
+you know if your system is up or down", they might not
+be able to tell you.
+</p><p>
+It is important to have a business metric for system behavior.
+For us, there are two:  how many people are able to stream video,
+and how many signups are happening.
+If those numbers change a lot, then we know something is wrong.
+</p><p>
+Another thing you need:  you need to be able to design your system
+for resiliency.
+If the system can't withstand failures, there is no sense doing
+Chaos testing.
+For us, that usually means redundancy -- multiple servers are
+implementing services, and you have fallbacks.
+It is this "graceful degradation", which is very common now in
+web services.
+</p><p>
+For example, in Netflix, we present the user with a list
+of recommendations.
+If the personalization system fails, we have some reasonable
+fallback -- you don't have personalized recommendations, but
+you do have some general recommendations.
+That's most of what we are testing with our Chaos experiments -- that
+the fallbacks are working.
+</p><p>
+The last thing you need:  monitoring and alerts -- so that when
+something bad is happening to your system, people get notified,
+so you can minimize the outage.
+</p><p>
+<b>Ian.</b>
+At Yahoo, in many ways, we developed a lot of the graceful
+degradation strategies you would implement to support Chaos testing
+10 years ago.
+We already have something called Fail Safe, where we
+crawl our own site to serve a cache version of our home page or
+the main page of finance to a user if we can't get the
+personalized version.
+</p><p>
+It's companies that haven't thought of this that aren't
+quite in a position to start Chaos Engineering.
+They don't have something to fall back onto.
+</p><p>
+<b>Heather.</b>
+We need to have monitoring systems in place before we do
+Chaos Engineering.
+</p><p>
+<b>Q9.</b>
+How do you choose which Chaos techniques to use?
+</p><p>
+<b>Heather.</b>
+Our team was up and running for a while before we started
+using Chaos Engineering.
+The first round was pretty "reactive".
+We looked at problems in production, what kinds of things
+caused the most serious errors --
+let's try to run those against the system and make it better.
+</p><p>
+After we got those working, then we looked at questions from
+design -- "if this ever went down, it would really suck" --
+we would test them to see what happened.
+</p><p>
+One of the mantras from our team:
+If there is anything that scares you, do that over and over again
+until it is no longer scary.
+</p><p>
+The more we scale, more failures become inevitable.
+Instead of sitting around and being terrified,
+let's just trigger that every week until
+we are confident that our system will handle it correctly,
+recover correctly, or at least degrade in a nice way.
+</p><p>
+<b>Ian.</b>
+I worked at LinkedIn prior to Yahoo.
+LinkedIn was in a single data center:  we had a second cold
+data center that in theory we could fail over to,
+but everyone knew that it would be 24 hours of downtime.
+We finally got to the point where we could run warm-warm,
+and we just started failing back and forth between them
+multiple times a day for months on end.
+It was very stressful, but as Heather said, you do something
+scary and stressful, and after a while, it starts becoming
+not scary and not stressful.
+</p><p>
+I view Chaos as inextricably linked with Web SRE - site reliability
+engineering.
+There are four things you look at in SRE:
+RPS (requests per second), latency, errors, and saturation.
+Work with any of those things in combination, all at the same time...
+between dependent services that are important to your system...
+</p><p>
+Engineers aren't always thinking about these things as they are
+writing their awesome new feature,
+so it is our job to help them
+be grounded in an operational sensibility.
+</p><p>
+<b>Q10.</b>
+Do you systematically choose values for each of those things
+based on how much you think you can handle?
+How do you ramp up and tune the testing?
+</p><p>
+<b>Ian.</b>
+Today it is very rigid and not terribly dynamic,
+which is something I'm not happy with.
+We want to make it randomized.
+Right now, developers fill out a recipe -- such as:
+"I wonder what would happen if my downstream didn't return
+a response within 15 seconds..."
+They can run that through the Chaos system and find out that
+everything breaks or you get a blank page.
+Or what happens if I get a 302 redirect or a 404 or whatever.
+</p><p>
+It's largely manual today,
+but we are moving to a world where that is automated.
+</p><p>
+<b>Q11.</b>
+Do you have a systematic way to investigate these kinds of
+failures?
+Do you have models so you can gain some systematic confidence that you
+have covered some space?
+</p><p>
+<b>Lorin.</b>
+We're not there yet, but we are trying to get there.
+One of the things we do is to inject failures between
+two services.
+</p><p>
+In a remote procedure call, we can do either "latency" or "failure".
+For example, "If service A calls service B, for users that match these ids,
+then fail that request (return an error right away) -- or add 400 milliseconds
+of latency."
+</p><p>
+Right now, the service teams will define a scenario where they
+control how many things fail -- how big of a population they
+want to do an experiment on.
+</p><p>
+Where we would like to go:  Every time you push your code into production,
+and it graduates and gets deployed, then we would do some experiments.
+We would have a controlled group of test scripts, and those scripts
+would have those kinds of failures injected in downstream services,
+and we would see if that service would be able to withstand
+and recover from those kinds of downstream errors.
+</p><p>
+That's the dream of the Chaos automation platform I am working on now.
+But we are still working on it.
+</p><p>
+<b>Aaron.</b>
+My current work at Netflix involves
+simulating a maximally degraded state
+that we can think we can tolerate.
+</p><p>
+We have hundreds of microservices, but only a small handful
+are required to have our minimally viable functionality.
+So we insure that is true by exposing a very small percentage
+of traffic for a very small time to that maximally-degraded state.
+</p><p>
+<b>Q12.</b>
+How do you measure your productivity?
+</p><p>
+<b>Lorin.</b>
+We don't do any productivity measurements.
+I think there would be an allergic reaction if we tried to do that.
+It's assumed that the service you are building has to be
+resilient to downstream failures.
+If it is not, you are responsible for fixing it.
+It is a sort of social norm, you can't just say you aren't going
+to be resilient to that kind of failure.
+</p><p>
+<b>Aaron.</b>
+Do either of you two (Ian and Heather) measure productivity
+impact of Chaos experimentation?
+</p><p>
+<b>Ian.</b>
+No, not at all.
+</p><p>
+<b>Heather.</b>
+We do, in a sense that we have some dedicated environment,
+and it sends alerts with a little tag on it.
+But we don't have a good way to measure if someone's change
+is impacting our service.
+All we have is when the number of errors goes up, let's
+go see what is causing it.
+</p><p>
+<b>Q12.</b> <i>(continued)</i>
+Do you see slower growth?
+</p><p>
+<b>Aaron.</b>
+So the question is "does Chaos testing impacting your velocity in a
+negative way?"
+</p><p>
+<b>Heather.</b>
+In my team, I would say no.
+They are pretty grateful for it.
+But we don't run a whole bunch of cached tests on a regular basis.
+It is mostly running some small failures that we expect to recover from.
+It means that when we get alerts, we did something wrong.
+So most of the noise that this generates is all "actionable" noise --
+that something has changed in the performance quality, and it
+has to be fixed before we go into production.
+</p><p>
+<b>Lorin.</b>
+And for us, for the Chaos Monkey that runs in the background and
+randomly terminates things --
+at this point, everyone is building their services to be redundant.
+It has been there long enough that if we turned it off now,
+it probably wouldn't have an effect anymore.
+People know how to build their services so that it doesn't
+affect them one way or the other.
+</p><p>
+But for the experiments, where we inject failures downstream,
+they are trying to reduce the effort to do the injection -- so
+it will cost less and they will do it more.
+One of the challenges for the Chaos Engineering team is to do some
+internal marketing, to convince people that it will improve
+their productivity.
+</p><p>
+We have a couple of friendly teams who are doing a lot of work
+manually that we are trying to automate.
+If we can automate more and we can make the effort for engineers minimal,
+engineers will just enable the option once it is there.
+</p><p>
+<b>Ian.</b>
+I think for us it slows down velocity slightly.
+When you run a test and it surfaces 7 bugs that you hadn't planned on
+closing before Friday's release...
+But developers would rather do that in the daytime than at 3:00am.
+It's an acceptable tradeoff.
+</p><p>
+<b>Lorin.</b>
+We don't have a dedicated operations team,
+and the engineering teams are responsible
+for operating their own services.
+There is a big incentive for making sure your service is reliable.
+If your code breaks because you didn't handle some error case,
+you're going to be the one who is paged at 3 in the morning.
+</p><p>
+<b>Heather.</b>
+It's the same thing here.
+Developers are grateful, because getting the test failure
+or field check failure
+is infinitely better than getting the late night call.
+</p><p>
+<b>Lorin.</b>
+I don't think it has a report of exactly what failure condition
+caused your system to go down.
+</p><p>
+<b>Ian.</b>
+We're in an evolution at Yahoo to get developers more in tune
+with their software in production.
+They have relied on operations folks to do that.
+But we are trying to push that responsibility more to the developers.
+</p><p>
+<b>Q13.</b>
+Did you create any new processes to accommodate failures?
+</p><p>
+<b>Aaron.</b>
+So you are asking did we have to add any new systems to support Chaos?
+</p><p>
+<b>Q13.</b> <i>(continued)</i>
+Are some of these techniques already existing alongside of Chaos methods,
+and were some of them new techniques at a high level for injecting failures?
+</p><p>
+<b>Lorin.</b>
+For us, we have a bunch of libraries for doing a real remote procedure
+call.
+We were able to put hooks in there.
+All of the services are using certain Java libraries to communicate
+between clients and servers, and because we can control those libraries,
+we can put injection points into them.
+</p><p>
+We have a library called FIC (Failure Injection Testing) -- and it is
+because we have that common platform behind all our services
+that use that code... so we can cause failures on either the client
+side or the server side -- either latency or errors.
+</p><p>
+What makes this work is that we control a layer of software on both
+the clients and the server.  If we didn't have that, it would be very
+much harder.
+</p><p>
+The service at the edge -- named Zuul -- knows which
+users should have failures in which services.
+When a request comes in, it gets annotated with the services
+that will need to fail.
+That metadata gets passed on through the whole call chain.
+</p><p>
+<b>Ian.</b>
+Our version of Chaos is called Nemesis.
+Right now, it is only available in the test pipelines.
+It's "opt in", so if you want to run Nemesis on your system,
+you install a library and proxy your requests through it.
+It has access to every element of that request -- it can terminate
+a connection, inject latency, and so on.
+</p><p>
+<b>Q14.</b>
+You're saying there's a host-local proxy -- they just point the
+connection at localhost, and it does all of the interception.
+So you don't have to have a standardized RPC library.
+</p><p>
+<b>Ian.</b>
+That's right.
+</p><p>
+<b>Heather.</b>
+Our very first version of our Chaos Engineering system was
+very simple -- very similar to Netflix's Chaos Monkey.
+It just chose a random node and shot it.
+For that version, we didn't need anything more complicated
+than what we already had in Azure.
+</p><p>
+As we wanted to start testing more sophisticated areas (including
+latency), we made some wrappers we could configure to add more
+latency based on request.
+But we are not quite at that maturity yet.
+For components that we completely own ourselves, we can do some
+complex things.
+But mostly we are only able to kill a connection or drop a connection.
+</p><p>
+<b>Aaron.</b>
+<i>(Next question from the panel session slides.)</i>
+Where has Chaos Engineering been successful in your organization?
+</p><p>
+<b>Heather.</b>
+The biggest thing we have gotten from Chaos Engineering
+is to increase our confidence in the reliability of our system.
+</p><p>
+Before we started doing this, we had some scenarios where
+not only would some huge critical system would go down,
+but our system would do a terrible job of recovery afterwards.
+We would get "all hands on deck" -- and we didn't know what was
+going on.
+But now we were reliable enough to not go down as often, and
+we knew our systems would come back up reliably and gracefully.
+It has made doing DevOps a lot nicer.
+</p><p>
+It has also made our monitoring and alert system a lot better.
+In Chaos Engineering, when something goes wrong, then either
+we alert nicely or we don't alert (we don't create any false noise).
+Everything that comes out of our system is actionable,
+and if it fails, it doesn't give us twenty thousand alerts per minute.
+</p><p>
+<b>Ian.</b>
+We have used it on two products:  Daily Fantasy and Finance.
+Daily Fantasy is a recent rollout -- Finance is an upgrade to
+look and feel, functionality, and the underlying tech stack.
+By injecting latency or severing connections or returning error codes,
+we've been able to get those systems to provide at least
+something other than blank screen or a 404 error.
+It's early days, but we've seen some improvements.
+</p><p>
+<b>Lorin.</b>
+Netflix is interesting as a company because it only has one service.
+But if you look at the software that gets built, there are three
+parts:  the client devices (where you actually watch),
+the content delivery network (where the video actually lives and
+gets streamed to you), and the control plane (which is absolutely
+everything else).
+</p><p>
+We've used Chaos mainly in the control plane.
+The content delivery people use it sometimes, but they are totally
+separate team, so we don't interact with them too much.
+</p><p>
+One area where it has been successful for us: Chaos Monkey,
+because when we moved to Amazon and our old servers went away,
+it helped us get to the level of reliability to handle servers
+going down in the cloud.
+</p><p>
+Another area is Chaos Kong.  We talked about LinkedIn failing over across
+data centers multiple times a day.
+We don't do it that often, but I think we do it once a month.
+Netflix runs in three geographically distributed regions:  US east coast,
+US west coast, and western Europe.
+We can serve traffic out of any of those regions.
+You are served out of the geographically closest region to minimize
+latency.
+When there is a problem, say Amazon goes down in US east, we can
+redirect those requests to the other two regions.
+</p><p>
+But we need to make sure that this works, because it depends
+on having the architecture such that everything can run independently
+in the different regions.
+Once a month, we will evacuate one of those regions -- proxy all
+of the traffic out of US east to western Europe, for example -- hold
+it there for about a day, and then send everything back.
+There have been times when we have done that exercise and it hasn't worked
+and we have had to fix things.
+It is a bit of effort -- it isn't just pushing one button to
+evacuate a region.
+</p><p>
+This has been a success -- we have uncovered a lot of failover problems
+this way.
+</p><p>
+Finally, the Chaos experiments where we have injected errors between
+microservices -- these have found problems.
+</p><p>
+<b>Aaron.</b>
+<i>(Next question from the panel session slides.)</i>
+Have you experienced any failures when trying Chaos Engineering?
+</p><p>
+<b>Ian.</b>
+That's kind of the point.
+</p><p>
+<b>Heather.</b>
+Not failures per se, but I will say that when we get
+some reliability problem or unforeseen bug in production,
+problems that could be caught with better Chaos Engineering,
+I feel that is a failure of Chaos Engineering.
+We only have a limited set of resources to throw at this system.
+There are definitely gaps -- and those gaps are very obvious when
+you look at areas where production bugs are found.
+It seems that the production bugs are always in the areas
+that we don't have good coverage with Chaos Engineering.
+</p><p>
+<b>Ian.</b>
+We haven't seen things go as fast as we liked -- investment,
+buy in, and adoption.
+We are trying to push it into additional products,
+and we are seeing customers outside of our media division (search and
+mail) who are coming to us to see if they can use Nemesis as well.
+</p><p>
+<b>Lorin.</b>
+There was a tool called Latency Monkey, which randomly
+inserted latency between services.
+The engineers thought it was too dangerous to use it.
+It never saw widespread adoption.
+</p><p>
+That lead to the failure injection testing, where there is
+controlled latency injected between the services.
+</p><p>
+It's interesting -- randomly turning something off is safer
+than adding a random delay to a request between services.
+</p><p>
+Engineers didn't use it, they never turned it on, so it is now gone.
+</p><p>
+<b>Q15.</b>
+How did you mitigate the risks of experimenting on production systems?
+</p><p>
+<b>Lorin.</b>
+One thing we do in Chaos experiments:  we control how many users
+are subjected to an experiment.
+Our goal is to make that test group as small as we can.
+We are trying to reduce the "blast radius" by inflicting the
+minimum amount of harm to customers when we do these experiments.
+</p><p>
+<b>Aaron.</b>
+<i>(Next question from the panel session slides.)</i>
+People often say, "This approach won't work for me
+because we have challenges that are unique to our organization."
+What do you say to them?
+</p><p>
+<b>Heather.</b>
+Our challenge is that we are a very small team.
+We began as a startup at Microsoft -- 3 people.
+When I joined, there were 5 or 6, and when I started
+doing Chaos Engineering, there were 7 or 8.
+</p><p>
+This was definitely a side product that I worked on.
+That made it harder to get up and running.
+If I wanted anyone to help me out,
+I had to convince them that it was worthwhile.
+I didn't have management support -- I had to convince
+people to help me in their free time.
+</p><p>
+I got buy in through finding bugs in other people's code.
+Once you do that enough times, they get a little more excited about
+helping you out.
+</p><p>
+Since we were a small team, *automation* was the highest priority for me.
+I knew I needed a system that I could just set and forget.
+It was a little difficult to get up and running,
+but over the past year, these things run continuously.
+Other than the extra work to monitor alerts, there is no work
+I have to do on it.
+</p><p>
+<b>Ian.</b>
+For Nemesis, we focused on a small number of customers initially,
+to get buy in from them.
+We are on a quarterly planning and goal system,
+and we had commitments in writing ahead of time from
+our product-facing development partners -- commitments that
+they would invest in working with Nemesis, using it in their
+pipelines, and giving us feedback.
+</p><p>
+That gave us confidence to work on the engineering, that they
+would have the cycles to test the work we were doing.
+</p><p>
+When we started finding bugs, there was a light bulb going off
+in their heads -- that is when it started to get talked about
+in bigger groups, and more people started to hear about it.
+That is when we were able to grow the team working on it from
+two to four.
+We started to get other organizations and teams asking us how
+we could get involved.
+</p><p>
+<b>Lorin.</b>
+We had a lot of buy in from management,
+but we have to convince teams to work with us.
+We can't force them.
+</p><p>
+We need to have success stories.
+We need to find some friendly potential customers to come
+try it out.
+If it works, we can use it for internal evangelization.
+</p><p>
+<b>Ian.</b>
+Testimonials are very powerful.
+When you have trusted third parties sources saying
+"we used the product and it did this for us" -- 
+that's when the adoption really spreads quickly.
+</p><p>
+<b>Q16.</b>
+I'm in a university.  What would I have to do to get an
+environment set up for students to try this?
+I want them to have hands-on experience.
+</p><p>
+<b>Ian.</b>
+I think you want your students (or development partners in industry)
+to really understand that systems are very complex, and they are going
+to break in unexpected ways forever.
+As soon as you internalize those facts,
+then you start to develop software in a way that predicts that
+bad things are going to happen and recovers from them.
+That needs to be part of the curriculum.
+</p><p>
+How you might do this in a lab setting...
+it's a good question.
+</p><p>
+<b>Q16.</b> <i>(continued)</i>
+Maybe you could grab a small open-source project,
+and pack some of the stuff you have around it?
+Or maybe that is too much for a course?
+</p><p>
+<b>Q17.</b>
+We tried something at North Carolina State --
+in part of a class, the instructor built a DevOps pipeline to work from,
+then he asked us to build one of the Monkeys from scratch,
+and he gave us some examples of how to break things.
+</p><p>
+<b>Q18.</b>
+In all of the applications you have control of the delivery.
+In products that I have delivered, you have to hand off to IT,
+and there is limited access to the actual deployment.
+</p><p>
+<b>Aaron.</b>
+So I guess the question is how do you do Chaos Engineering in
+"on premises" systems?
+</p><p>
+<b>Heather.</b>
+A lot of companies have released open source tools,
+so you can hand off some Chaos testing tools along with
+them -- you might say "here are some tools you can use along with the
+product if you want to increase reliability."
+</p><p>
+<b>Lorin.</b>
+Do those tools call home? or do you just hand them off and that's it?
+</p><p>
+<b>Q18.</b> <i>(continued)</i>
+Automotive OEM -- I have to give it to their IT department, and they deploy it.
+It's totally firewalled from us.  Nothing calls home right now.
+</p><p>
+<b>Aaron.</b>
+Having the injection points for failure documented and available and part of
+the deliverable...
+this enables Chaos testing for your consumers who want to do it.
+</p><p>
+While we perform Chaos experiments, we primarily build internal tools for
+other teams to perform their Chaos experiments inside of Netflix.
+So providing those hooks and selling them as part of their feature delivery
+could be a way of practicing Chaos and having customer practice it.
+</p><p>
+<b>Q20.</b>
+I was thinking about how to answer the question about organizations
+adopting Chaos.
+I'm in a 60 person company,
+and we are very concerned with focusing on
+"features first", "then the bugs from the features", and
+"then everything else".
+This (Chaos) is in the "everything else" category.
+</p><p>
+How do you sell this, so they feel they are getting value back?
+Should we be working on features and bugs, or should we slow
+down a bit to work on production qualities?
+</p><p>
+<b>Lorin.</b>
+Are you trying to sell that to managers or the engineers?
+</p><p>
+<b>Q20.</b> <i>(continued)</i>
+My engineers are open to higher quality.
+It is mainly not engineering people -- product people, sales, marketing.
+</p><p>
+<b>Lorin.</b>
+So they need to make a business case for it before spending engineering effort.
+</p><p>
+<b>Q20.</b> <i>(continued)</i>
+Yeah, "why is it worth it?"  And, you always get "it should always be up."
+</p><p>
+<b>Lorin.</b>
+Can you quantify what downtime costs?
+Maybe it is not expensive.
+</p><p>
+<b>Q20.</b> <i>(continued)</i>
+We're a B2B product, and we have about 30 enterprise customers.
+You guys are more consumer oriented, where you have millions of customers.
+One downtime for us costs us thousands of dollars.
+</p><p>
+<b>Ian.</b>
+It sounds like you should be able to quantify it.
+Look at how your Service Level Agreements (SLAs) are written.
+Or the way in which you charge for your services.
+You should be able to make some presentation to management:  "if we were
+down for 2 hours, this is a plausible damage to the brand, lost revenue, and
+so on, and this is why we are going to pause feature development for
+two weeks or a month to do this."
+</p><p>
+Even if they poke holes in it, this is going to
+open their eyes to the fact that it is not all about features.
+You want to build a resilient system.
+You want to be training engineers to think about resiliency from
+the beginning, instead of as an afterthought.
+</p><p>
+<b>Lorin.</b>
+I would make that argument immediately after an outage.
+It is easier to sell when it is in their minds.
+</p><p>
+<b>Ian.</b>
+And you can manufacture that outage if you want to.
+</p><p>
+<b>Heather.</b>
+That is one of the main ways I got buy in.
+We had a miserable experience with
+half the team up half the night -- and I said "By the way,
+this is how we fix this."
+I said if we found these bugs earlier, wouldn't that be better
+than 3 hours time for 5 people at 3:00am while customers are down?
+Wouldn't it be nicer to figure out how to make it only one
+hour and one person the next time it fails?
+</p><p>
+You can use your previous examples of downtime to sell Chaos Engineering.
+</p><p>
+<b>Ian.</b>
+In the system I talked about earlier -- a B2B system with 5 minutes
+of downtime is a quarter on the phone with the customer...
+</p><p>
+We hadn't thought about hardening the DNS system -- we hadn't
+put in a lot of checks whether a config is a number of bytes larger
+or smaller than the previous one, or maybe it is zero bytes.
+Maybe these are obvious things (in hindsight, after an outage),
+but we had never done it, and we were facing a never-ending
+backlog of revenue producing new feature requests from customers.
+</p><p>
+We were proud of our ability to turn those around quickly,
+but we were able to convince management that we should just
+pivot the engineering team for a month to get this done,
+so it would never happen again.
+We pointed out that we would protect enough revenue so that
+although there were customers who were waiting for the other features,
+the delayed revenue was outweighed by having a much stronger system.
+</p><p>
+<b>Aaron.</b>
+If you get the pushback, "Don't you write fault tolerant
+systems the first time?  Why do you need to do Chaos?" -- that's
+a question I get.
+</p><p>
+In a project of 20 or 30 developers, no one developer can keep up
+with the output of the other developers.
+And in a distributed system, you need all 30 developers to be aware
+of what the other 29 developers are doing -- to make sure that
+their interactions don't yield surprising results.
+</p><p>
+Because our systems are too complex to understand, we have to look
+at other ways of testing the system, to make sure it is fault tolerant.
+</p><p>
+<b>Heather.</b>
+If you don't have buy in to have everybody work on the system (to do
+automated Chaos testing), you can just run manual commands on
+your system.
+The first time we did this, we produced a fair amount of bugs just
+poking at it manually.
+If your system has never been tested like this, you might be
+surprised at what you see.
+It might be a cheap way to get buy in.
+</p><p>
+<b>Aaron.</b>
+<i>(Next question from the panel session slides.)</i>
+Were you able to reuse any existing tooling, or did you build your own?
+</p><p>
+<b>Ian.</b>
+We considered just reusing Chaos Monkey -- we used it as inspiration,
+but we ended up writing our own.  We have intricacies and idiosyncracies
+within our platform that cause us to have to use something custom-built.
+Yahoo has a rich tradition of Do-it-yourself and build-your-own,
+so we just decided we would try to create some innovation and
+motivation in the team and so on.
+</p><p>
+<b>Heather.</b>
+I was lucky to be working on a system where we already had a really
+strong and robust system for managing distributed jobs.
+For the Chaos operations, I defined some new jobs -- they
+call little scripts that do the work.
+</p><p>
+The basic machinery is the exact same machinery I use to do deployments
+or scaling or to deliver hot fixes.
+So it was very little work, I was mostly building on existing components.
+</p><p>
+<b>Lorin.</b>
+We did it all in-house.
+We were some of the first people to talk about it publicly.
+We open-sourced a lot of stuff as a recruiting tool.
+</p><p>
+I suspect that most companies are going to have to build their own stuff.
+The hard part not just randomly doing Chaos.
+The hard part is plugging into the infrastructure, and
+everyone's infrastructure looks a little bit different.
+It's not clear that adapting an open source package is easier
+that building it from scratch.
+</p><p>
+<b>Aaron.</b>
+I'd like to ask each panelist if their group is hiring.
+</p><p>
+<b>All panelists.</b>
+Yes!
+</p><p>
+<b>Aaron.</b>
+Have you automated any of your Chaos Engineering experiments?
+</p><p>
+<b>Ian.</b>
+All of ours are sort of manually automated, meaning
+you put together the recipes you want to use, and they just run in
+every Continuous Delivery job you kick off.
+We want to automate the manual part eventually, but we are not there yet.
+</p><p>
+<b>Heather.</b>
+The bulk of what we are doing for Chaos Engineering is automated.
+We have a dedicated environment will run low level
+tests if you flip a configuration switch.
+Usually, I have the switch set on medium -- that just pokes at the
+system in ways that we expect it to recover gracefully without
+any noise.
+</p><p>
+That's running all the time -- it is running now.
+I also have it set up so that anyone can have their own instance.
+</p><p>
+Our Chaos experiments are more heavy-handed -- they require more
+manual work.
+They are still automated jobs, but someone has to launch them.
+</p><p>
+<b>Lorin.</b>
+Chaos Monkey is fully automated.
+Failure injection is sort of semi-automated.
+We are trying to
+get to a fully automated approach, where it will automatically
+choose which services to fail, figure out how to
+inject them, and do analysis automatically, and feed
+that back to the user -- but we are not there yet.
+</p><p>
+<b>Aaron.</b>
+There is also some work from Peter Alvaro (UC-Santa Cruz) called
+lineage-driven fault injection (you can find his paper -- look it up in your
+favorite web search tool).  It is the automated creation
+of failure injection scenarios and monitoring of response codes
+to dynamically discover the required dependencies for your
+request patterns.
+</p><p>
+<b>Aaron.</b>
+<i>(Next question from the panel session slides.)</i>
+Where would you like to take this approach next?  What are the
+obstacles to getting there?
+</p><p>
+<b>Lorin.</b>
+We want to automate as much as possible.
+We also want to broaden the failures we are looking at.
+</p><p>
+For failure injection, we are only looking at latency and failing requests.
+And we are only looking at the request path -- the chain of requests from
+where a client makes a request into Netflix -- only those requests get
+tagged with possible failure injection.
+</p><p>
+But there are issues when you start up the server.
+We don't do any failure injection there.
+Start up problems are difficult to deal with, so we want to catch them.
+</p><p>
+We would like to play with data corruption.
+That's a little dangerous.
+It's safer to fail a request than to mangle a response.
+But we've had problems and outages because some service returned an
+unexpected response and some cache got poisoned.
+</p><p>
+We'd like better information from the client side.
+We don't see what the user sees on the device -- they could get
+a pop-up or something else.
+We want to know if the user experience is good.
+</p><p>
+We've talked about doing human interface Chaos testing.
+What happens if there is an outage and a particular team is not available.
+Can Netflix handle that situation?
+I know Google does some crazy things like that.
+</p><p>
+<b>Heather.</b>
+If you think of your system as a combination of the computer parts
+and the human parts -- you want redundancies but not bottlenecks in the
+human aspects of the system.
+I think we might have some single points of failure in our team.
+</p><p>
+I want to add more tests to the layer above us.
+Almost all of our tests are around the backend infrastructure,
+but I would love to get some allies who on the higher levels.
+Maybe they can help me introduce more latency or adding in some
+weird inputs.
+</p><p>
+The other thing I would like to do is straight-up crashes.
+I've done it a few times manually, but I would like to have
+an automated crash to see what happens.
+We want the ugliest and worst kind of crash...
+</p><p>
+We are often running on Azure VMs, and sometimes when you
+lose connection to storage on a virtual hard drive,
+it can fail in really weird ways.
+I would love to be able to force that to happen in our
+testing.
+</p><p>
+We are within the Microsoft Azure ecosystem.
+And I know that some teams there are doing their own
+Chaos Engineering fault injection.
+And I would love to get together a service-wide movement -- with
+some coordination between teams.
+</p><p>
+<b>Ian.</b>
+For us, the next logical step is to do this in production.
+And to have really rich instrumentation that is tying the results
+of Chaos Engineering and Chaos fault injection into meaningful
+changes in the metrics we care about.
+</p><p>
+Lorin was talking about choosing a small number of users and
+subjecting them to some Chaos tests.
+It occurred to me that you could even surface that to a user --
+pop up a little alert that says "you may have noticed that this
+page is really slow... do you want to know why?"
+You could let them understand that you are subjecting them to a
+laboratory experiment.
+Maybe you could give them the ability to opt out.
+In a weird way, it might make users like your service more, because
+they can tell that you are constantly trying to improve it.
+</p><p>
+<b>Q21.</b>
+The whole idea of experimenting with users scares me somewhat.
+I think there is an ethical issue here.
+Let me give you a hypothetical situation...
+</p><p>
+Not all users are emotionally stable.
+You have fragile users.
+Suppose that someone has a bottle of sleeping pills,
+just needing that scene from a Netflix movie to get them through the night.
+But your service stops... so they take their pills.
+Suppose some smart lawyer knows you are doing Chaos Engineering,
+subpoenas your records, and finds out they were being screened from a server
+that you intentionally brought down.
+Is Netflix prepared for that?
+</p><p>
+<b>Lorin.</b>
+I feel I shouldn't answer that without a lawyer present.
+</p><p>
+That's probably an argument not to expose explicitly who is affected.
+Our goal is to reduce the number of people overall that miss a stream.
+There is an expectation among people who use internet services that
+occasionally you get an error, and you just try again.
+</p><p>
+The fact is that we sometimes cause failures and people don't notice --
+people have become so used to unreliable network-based software.
+</p><p>
+But that scenario is a good reason not to identify or advertise
+who we are specifically targeting.
+</p><p>
+<b>Ian.</b>
+I retract my comment.
+</p><p>
+<b>Q22.</b>
+Isn't this an argument for not doing much of this, and putting more
+into doing conventional testing?
+</p><p>
+<b>Lorin.</b>
+For us, this looks like the best way.  And we do regular testing as well.
+This approach has had value for us.
+We've become more reliable because of it.
+</p><p>
+Google has a recent book about reliability engineering.
+They have an error budget.
+There are a certain number of times that engineers are allowed to cause an
+outage, and after that, they aren't in engineering services anymore.
+</p><p>
+We have that error budget idea.  And as long as we are good enough overall,
+it is considered worth it.
+</p><p>
+<b>Aaron.</b>
+You could also say that if you are not doing Chaos Engineering in production,
+and you have an artificially inflated failure rate in production,
+then the question could be raised if you are being negligent.
+</p><p>
+<b>Q23.</b>
+How big is your Chaos Engineering team?
+</p><p>
+<b>Lorin.</b>
+If you don't count the manager, there are 3 engineers.
+</p><p>
+<b>Ian.</b>
+4
+</p><p>
+<b>Heather.</b>
+0.5 - we all do some, but it's no one's full time job on my team.
+</p><p>
+<b>Aaron.</b>
+We are at the end of our time.  Thank you very much.
+</p>
+
+<hr>
+Last modified: May 26, 2016
+
+
+</body></html>
