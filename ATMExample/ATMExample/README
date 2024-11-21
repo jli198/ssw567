@@ -1,0 +1,8 @@
+To rebuid the system, 
+$ cd source
+$ rm *.class atm/*.class banking/*.class simulation/*.class atm/transaction/*.class
+$ javac *.java
+
+Note that Execute.html has been changed to use the "source" directory, not the "classes" directory
+
+
